@@ -1,0 +1,1964 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Blacked Out</title>
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel2: rgba(255, 255, 255, 0.08);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.62);
+        --faint: rgba(255, 255, 255, 0.35);
+        --accent: rgba(255, 255, 255, 0.92);
+        --danger: #ff3b3b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+        overflow-x: hidden;
+      }
+
+      .app {
+        min-height: 100%;
+        display: grid;
+        grid-template-rows: 1fr;
+      }
+
+      .screen {
+        display: none;
+        padding: 22px 16px;
+        min-height: 100vh;
+        place-items: center;
+      }
+
+      .screen.active {
+        display: grid;
+      }
+
+      .frame {
+        width: min(980px, 100%);
+        display: grid;
+        gap: 18px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+
+      .title {
+        font-size: clamp(26px, 4vw, 44px);
+        letter-spacing: 0.02em;
+        font-weight: 650;
+      }
+
+      .tagline {
+        color: var(--muted);
+        font-size: clamp(14px, 2vw, 18px);
+      }
+
+      .pill-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+        touch-action: manipulation;
+      }
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.22);
+        transform: translateY(-1px);
+      }
+
+      .btn:active {
+        transform: translateY(0px);
+      }
+
+      .btn.primary {
+        border-color: rgba(255, 255, 255, 0.26);
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .btn.ghost {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.14);
+      }
+
+      .seg {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .seg button {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .seg button.active {
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--text);
+      }
+
+      .switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .switch label {
+        color: var(--muted);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .switch input {
+        width: 46px;
+        height: 26px;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        position: relative;
+        outline: none;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        transition: background 120ms ease, border-color 120ms ease;
+      }
+
+      .switch input::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        transition: transform 140ms ease;
+      }
+
+      .switch input:checked {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.28);
+      }
+
+      .switch input:checked::after {
+        transform: translateX(20px);
+      }
+
+      .hero {
+        margin-top: 20px;
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        padding: 18px 10px;
+      }
+
+      .hero .sub {
+        font-size: 16px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .main-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 14px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+
+      @media (max-width: 860px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+      }
+
+      .swatchWrap {
+        display: grid;
+        gap: 14px;
+        justify-items: center;
+      }
+
+      .swatch {
+        width: min(470px, 88vw);
+        height: min(470px, 88vw);
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+        background: #000;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .swatch::after {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.13), transparent 45%),
+          radial-gradient(circle at 70% 65%, rgba(255, 255, 255, 0.08), transparent 55%);
+        opacity: 0.35;
+        mix-blend-mode: screen;
+        pointer-events: none;
+      }
+
+      .phaseText {
+        text-align: center;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+      }
+
+      .phaseSub {
+        text-align: center;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .timerBlock {
+        display: grid;
+        gap: 10px;
+      }
+
+      .timerRow {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .timerLabel {
+        font-weight: 800;
+        color: var(--muted);
+        letter-spacing: 0.02em;
+      }
+
+      .timerNum {
+        font-weight: 900;
+        font-size: 22px;
+      }
+
+      .bar {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.10);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        overflow: hidden;
+      }
+
+      .bar > div {
+        height: 100%;
+        width: 50%;
+        background: rgba(255, 255, 255, 0.86);
+        transition: width 80ms linear, background 80ms ease;
+      }
+
+      .timerHint {
+        color: var(--muted);
+        font-weight: 800;
+        min-height: 18px;
+      }
+
+      .timerHint.danger {
+        color: rgba(255, 95, 95, 0.98);
+      }
+
+      .sliders {
+        display: grid;
+        gap: 14px;
+      }
+
+      .sliderRow {
+        display: grid;
+        gap: 8px;
+      }
+
+      .sliderTop {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .sliderName {
+        color: var(--muted);
+        font-weight: 800;
+        letter-spacing: 0.01em;
+      }
+
+      .sliderVal {
+        color: var(--text);
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 20px;
+        background: transparent;
+        margin: 0;
+        cursor: pointer;
+        touch-action: none;
+      }
+
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.30);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.55);
+        margin-top: -6px;
+      }
+
+      input[type="range"]::-moz-range-track {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.30);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.55);
+      }
+
+      /* The gradient is injected on the input element itself via inline style. */
+      input[type="range"].grad {
+        background: transparent;
+      }
+
+      input[type="range"].grad::-webkit-slider-runnable-track {
+        background: var(--grad);
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      input[type="range"].grad::-moz-range-track {
+        background: var(--grad);
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      .smallPrint {
+        color: var(--muted);
+        font-weight: 700;
+        line-height: 1.4;
+        font-size: 13px;
+      }
+
+      .resultGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+
+      @media (max-width: 860px) {
+        .resultGrid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .resultSwatchLabel {
+        text-align: center;
+        color: var(--muted);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        margin-top: 8px;
+      }
+
+      .metrics {
+        display: grid;
+        gap: 12px;
+      }
+
+      .metricRow {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .metricLabel {
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .metricVal {
+        font-weight: 950;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 18px;
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        display: none;
+        z-index: 60;
+      }
+
+      .toast.show {
+        display: inline-flex;
+        animation: toastIn 180ms ease;
+      }
+
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0px);
+        }
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        display: none;
+        place-items: center;
+        padding: 16px;
+        z-index: 70;
+      }
+
+      .overlay.active {
+        display: grid;
+      }
+
+      .modal {
+        width: min(720px, 100%);
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(12, 12, 12, 0.95);
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.7);
+        padding: 16px;
+      }
+
+      .modal h3 {
+        margin: 0 0 6px 0;
+        font-size: 18px;
+      }
+
+      .modal p {
+        margin: 10px 0;
+        color: var(--muted);
+        line-height: 1.5;
+        font-weight: 650;
+      }
+
+      .modal .closeRow {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 14px;
+      }
+
+      .blackout {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 50;
+        transition: opacity 500ms ease;
+      }
+
+      .blackout.on {
+        opacity: 1;
+      }
+
+      .compareList {
+        display: grid;
+        gap: 12px;
+      }
+
+      .compareItem {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .miniSwatchPair {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .miniSwatch {
+        width: 54px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #000;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      }
+
+      .compareText {
+        display: grid;
+        gap: 4px;
+      }
+
+      .compareTop {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .compareTitle {
+        font-weight: 950;
+        letter-spacing: 0.02em;
+      }
+
+      .compareSub {
+        color: var(--muted);
+        font-weight: 750;
+      }
+
+      .footerRow {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .kbdHint {
+        color: var(--muted);
+        font-weight: 800;
+        font-size: 13px;
+      }
+
+      .kbd {
+        font-weight: 900;
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        padding: 3px 8px;
+        display: inline-block;
+        margin-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div id="blackout" class="blackout"></div>
+
+      <!-- Start Screen -->
+      <section id="screenStart" class="screen active">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand">
+              <div class="title">Blacked Out</div>
+            </div>
+            <button id="howBtn" class="btn ghost" type="button" aria-haspopup="dialog">How scoring works</button>
+          </div>
+
+          <div class="hero">
+            <div class="tagline">They all look the same. Prove they don't.</div>
+            <div class="sub">
+              <span style="color: var(--muted); font-weight: 800">5 rounds</span>
+              · remember a very dark shade, then recreate it from sliders.
+            </div>
+
+            <div class="pill-row" style="margin-top: 10px; justify-content: center">
+              <div class="seg" role="tablist" aria-label="Difficulty">
+                <button id="btnNormal" type="button" class="active" aria-selected="true">Normal</button>
+                <button id="btnHard" type="button" aria-selected="false">Hard</button>
+              </div>
+            </div>
+
+            <div class="main-actions">
+              <button id="startBtn" class="btn primary" type="button">Start</button>
+              <div class="kbdHint">Submit with <span class="kbd">Enter</span> during guess</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Round Screen (Memorise + Guess) -->
+      <section id="screenRound" class="screen">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand">
+              <div class="title" style="font-size: 24px">Round <span id="roundNum">1</span>/5</div>
+            </div>
+            <button id="exitBtn" class="btn ghost" type="button" title="Back to start">Exit</button>
+          </div>
+
+          <div id="phaseMemorise" class="grid-2" style="display: grid">
+            <div class="card">
+              <div class="phaseText">Memorise this shade.</div>
+              <div class="phaseSub" id="memoriseSub">Focus. Then it’s gone.</div>
+              <div class="smallPrint" style="margin-top: 10px">
+                Saturation and brightness are intentionally tiny. Precision is the challenge.
+              </div>
+            </div>
+
+            <div class="swatchWrap">
+              <div id="targetSwatchMem" class="swatch"></div>
+            </div>
+          </div>
+
+          <div id="phaseGuess" class="grid-2" style="display: none">
+            <div class="swatchWrap">
+              <div class="card" style="width: 100%">
+                <div class="phaseText">Gone. Now recreate it.</div>
+                <div class="phaseSub">Adjust sliders. Watch the glow match.</div>
+              </div>
+
+              <div id="previewSwatch" class="swatch" style="margin-top: 14px; width: min(470px, 88vw); height: min(470px, 88vw)"></div>
+            </div>
+
+            <div class="card">
+              <div class="timerBlock">
+                <div class="timerRow">
+                  <div class="timerLabel">Time left</div>
+                  <div id="timerNum" class="timerNum">10</div>
+                </div>
+                <div class="bar" aria-hidden="true"><div id="timerBar" style="width: 100%"></div></div>
+                <div id="timerHint" class="timerHint"> </div>
+              </div>
+
+              <div style="height: 14px"></div>
+
+              <div class="sliders">
+                <div class="sliderRow">
+                  <div class="sliderTop">
+                    <div class="sliderName">Hue</div>
+                    <div id="hVal" class="sliderVal">0</div>
+                  </div>
+                  <input id="hRange" class="grad" type="range" min="0" max="360" step="0.1" />
+                </div>
+
+                <div class="sliderRow">
+                  <div class="sliderTop">
+                    <div class="sliderName">Saturation</div>
+                    <div id="sVal" class="sliderVal">0</div>
+                  </div>
+                  <input id="sRange" class="grad" type="range" min="0" max="100" step="0.1" />
+                </div>
+
+                <div class="sliderRow">
+                  <div class="sliderTop">
+                    <div class="sliderName">Brightness</div>
+                    <div id="bVal" class="sliderVal">0</div>
+                  </div>
+                  <input id="bRange" class="grad" type="range" min="0" max="100" step="0.1" />
+                </div>
+
+                <div class="footerRow" style="margin-top: 6px">
+                  <div class="smallPrint">Press <span class="kbd">Enter</span> or tap <b>Submit</b>.</div>
+                  <button id="submitBtn" class="btn primary" type="button">Submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Result Screen -->
+      <section id="screenResult" class="screen">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand">
+              <div class="title" style="font-size: 24px">Round Results</div>
+            </div>
+            <button id="resultExitBtn" class="btn ghost" type="button" title="Back to start">Exit</button>
+          </div>
+
+          <div class="resultGrid">
+            <div class="card">
+              <div class="resultSwatchLabel">Target</div>
+              <div id="targetSwatchRes" class="swatch" style="width: 100%; height: 300px; margin-top: 12px"></div>
+              <div class="smallPrint" style="margin-top: 10px">
+                H: <span id="tH"></span> · S: <span id="tS"></span> · B: <span id="tB"></span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="resultSwatchLabel">Your guess</div>
+              <div id="guessSwatchRes" class="swatch" style="width: 100%; height: 300px; margin-top: 12px"></div>
+              <div class="smallPrint" style="margin-top: 10px">
+                H: <span id="gH"></span> · S: <span id="gS"></span> · B: <span id="gB"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 18px">
+            <div class="metrics card">
+              <div class="metricRow">
+                <div class="metricLabel">Round score</div>
+                <div id="roundScore" class="metricVal">0.00</div>
+              </div>
+              <div class="metricRow">
+                <div class="metricLabel">Delta E (CIE76)</div>
+                <div id="deltaEVal" class="metricVal">0.00</div>
+              </div>
+              <div class="metricRow">
+                <div class="metricLabel">Phase</div>
+                <div id="phaseLabel" class="metricVal">Memorise</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="phaseText" style="text-align: left">Next</div>
+              <div class="phaseSub" style="text-align: left; margin-top: 8px">
+                New shade is coming. Don’t blink.
+              </div>
+              <div style="height: 16px"></div>
+              <button id="nextBtn" class="btn primary" type="button" style="width: 100%">Continue</button>
+              <div class="smallPrint" style="margin-top: 12px">
+                Keep going until the end. Total max score is 50.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- End Screen -->
+      <section id="screenEnd" class="screen">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand">
+              <div class="title" style="font-size: 24px">Final</div>
+            </div>
+            <button id="endExitBtn" class="btn ghost" type="button" title="Back to start">Exit</button>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="phaseText" style="text-align: left">Total score</div>
+              <div id="totalScore" class="title" style="font-size: 44px; margin-top: 10px; letter-spacing: 0.01em"></div>
+              <div id="gradeLabel" class="tagline" style="font-size: 18px; margin-top: 8px"></div>
+              <div class="smallPrint" style="margin-top: 12px">
+                Blinded by similar blacks. See if you can spot the family.
+              </div>
+
+              <div class="main-actions" style="justify-content: flex-start; margin-top: 16px">
+                <button id="shareBtn" class="btn primary" type="button">Share</button>
+                <button id="againBtn" class="btn ghost" type="button">Play again</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="phaseText" style="text-align: left">All rounds</div>
+              <div class="smallPrint" style="margin-top: 8px">
+                Target vs your guess. Delta E tells how far the colors drifted perceptually.
+              </div>
+              <div style="height: 12px"></div>
+              <div id="compareList" class="compareList"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="phaseText" style="text-align: left">Global Top 5</div>
+            <div class="smallPrint" style="margin-top: 8px">
+              Shared leaderboard across devices.
+            </div>
+            <div style="height: 10px"></div>
+            <div class="footerRow">
+              <input
+                id="lbName"
+                type="text"
+                maxlength="10"
+                placeholder="Name (max 10)"
+                style="
+                  width: 220px;
+                  max-width: 100%;
+                  border-radius: 10px;
+                  border: 1px solid rgba(255, 255, 255, 0.16);
+                  background: rgba(255, 255, 255, 0.06);
+                  color: var(--text);
+                  padding: 10px 12px;
+                  font-weight: 700;
+                "
+              />
+              <button id="lbSubmitBtn" class="btn primary" type="button">Submit score</button>
+              <button id="lbRefreshBtn" class="btn ghost" type="button" style="padding: 8px 10px; border-radius: 10px">
+                Refresh
+              </button>
+            </div>
+            <div id="lbHint" class="smallPrint" style="margin-top: 8px"> </div>
+            <div id="lbList" class="compareList" style="margin-top: 12px"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Scoring modal -->
+    <div id="howOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+      <div class="modal">
+        <h3 id="howTitle">How scoring works</h3>
+        <p>
+          The game compares your guess to the target in a perceptual color space (CIELAB), then measures the perceptual
+          distance as <b>Delta E (CIE76)</b>.
+        </p>
+        <p>
+          A smooth curve converts that distance into a base score out of 10. Then the scoring system adjusts for
+          hue correctness (warm vs cool blacks) and applies a small penalty when the hue family is off.
+        </p>
+        <p>
+          The final round score is the base score plus a “recovery” bonus and minus a “hue penalty”, all clamped
+          between 0 and 10.
+        </p>
+        <div class="closeRow">
+          <button id="howCloseBtn" class="btn primary" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" aria-live="polite">You see what others can't.</div>
+
+    <script>
+      // -------------------------
+      // DOM helpers
+      // -------------------------
+      const $ = (id) => document.getElementById(id);
+      const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+      function format1(x) {
+        return (Math.round(x * 10) / 10).toFixed(1);
+      }
+
+      function format2(x) {
+        return (Math.round(x * 100) / 100).toFixed(2);
+      }
+
+      function setSwatch(el, rgb) {
+        el.style.background = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+      }
+
+      function parseCssRgbString(rgb) {
+        const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+        if (!m) return { r: 0, g: 0, b: 0 };
+        return { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]) };
+      }
+
+      // -------------------------
+      // RNG
+      // -------------------------
+      function mulberry32(seed) {
+        let t = seed >>> 0;
+        return function () {
+          t += 0x6d2b79f5;
+          let x = Math.imul(t ^ (t >>> 15), 1 | t);
+          x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+          return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      // -------------------------
+      // Color conversions
+      // -------------------------
+      // HSV/HSB where:
+      // - H in degrees [0..360]
+      // - S in percent [0..100]
+      // - V/B in percent [0..100]
+      function hsvToRgb({ h, s, v, b: bri }) {
+        // The game uses HSB with the brightness field named `b`,
+        // but some helpers use the name `v`. Support both.
+        const vvInput = v === undefined ? bri : v;
+        let hh = ((h % 360) + 360) % 360;
+        const ss = clamp(s, 0, 100) / 100;
+        const vv = clamp(vvInput, 0, 100) / 100;
+
+        const c = vv * ss;
+        const x = c * (1 - Math.abs(((hh / 60) % 2) - 1));
+        const m = vv - c;
+
+        let r1 = 0,
+          g1 = 0,
+          b1 = 0;
+
+        if (hh < 60) {
+          r1 = c;
+          g1 = x;
+        } else if (hh < 120) {
+          r1 = x;
+          g1 = c;
+        } else if (hh < 180) {
+          g1 = c;
+          b1 = x;
+        } else if (hh < 240) {
+          g1 = x;
+          b1 = c;
+        } else if (hh < 300) {
+          r1 = x;
+          b1 = c;
+        } else {
+          r1 = c;
+          b1 = x;
+        }
+
+        const r = Math.round((r1 + m) * 255);
+        const g = Math.round((g1 + m) * 255);
+        const b = Math.round((b1 + m) * 255);
+
+        return { r, g, b };
+      }
+
+      // Convert sRGB (0..255) to linear RGB (0..1)
+      function srgbToLinear(u8) {
+        const x = clamp(u8, 0, 255) / 255;
+        return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+      }
+
+      // Standard D65 sRGB -> XYZ
+      function rgbToXyz({ r, g, b }) {
+        const R = srgbToLinear(r);
+        const G = srgbToLinear(g);
+        const B = srgbToLinear(b);
+
+        const X = 0.4124564 * R + 0.3575761 * G + 0.1804375 * B;
+        const Y = 0.2126729 * R + 0.7151522 * G + 0.0721750 * B;
+        const Z = 0.0193339 * R + 0.1191920 * G + 0.9503041 * B;
+        return { X, Y, Z };
+      }
+
+      function xyzToLab({ X, Y, Z }) {
+        // D65 reference white
+        const Xn = 0.95047;
+        const Yn = 1.0;
+        const Zn = 1.08883;
+
+        const xr = X / Xn;
+        const yr = Y / Yn;
+        const zr = Z / Zn;
+
+        const delta = 6 / 29;
+        const delta3 = delta * delta * delta;
+
+        function f(t) {
+          return t > delta3 ? Math.cbrt(t) : t / (3 * delta * delta) + 4 / 29;
+        }
+
+        const fx = f(xr);
+        const fy = f(yr);
+        const fz = f(zr);
+
+        const L = 116 * fy - 16;
+        const a = 500 * (fx - fy);
+        const b = 200 * (fy - fz);
+
+        return { L, a, b };
+      }
+
+      function hsvToLab(hsv) {
+        const rgb = hsvToRgb(hsv);
+        const xyz = rgbToXyz(rgb);
+        return xyzToLab(xyz);
+      }
+
+      function deltaE76(hsv1, hsv2) {
+        const lab1 = hsvToLab(hsv1);
+        const lab2 = hsvToLab(hsv2);
+        const dL = lab1.L - lab2.L;
+        const da = lab1.a - lab2.a;
+        const db = lab1.b - lab2.b;
+        return Math.sqrt(dL * dL + da * da + db * db);
+      }
+
+      // -------------------------
+      // Scoring (exactly as spec)
+      // -------------------------
+      function angularDistanceHue(h1, h2) {
+        const diff = Math.abs(((h1 % 360) + 360) % 360 - ((h2 % 360) + 360) % 360);
+        return Math.min(diff, 360 - diff);
+      }
+
+      function roundScoreFrom(hsvTarget, hsvGuess, deltaE) {
+        // Step 3 — Base score (S-curve)
+        const baseScore = 10 / (1 + Math.pow(deltaE / 38, 1.6));
+
+        // Step 4 — Hue recovery
+        const hueDiff = angularDistanceHue(hsvTarget.h, hsvGuess.h); // 0..180
+        const hueAccuracy = Math.max(0, 1 - Math.pow(hueDiff / 25, 1.5));
+        const avgSat = (hsvTarget.s + hsvGuess.s) / 2; // 0..100
+        const satWeight = Math.min(1, avgSat / 30);
+        const recovery = (10 - baseScore) * hueAccuracy * satWeight * 0.5;
+
+        // Step 5 — Hue penalty
+        const huePenFactor = Math.max(0, (hueDiff - 30) / 150);
+        const satWeight2 = Math.min(1, avgSat / 40);
+        const penalty = baseScore * huePenFactor * satWeight2 * 0.4;
+
+        // Step 6 — Final round score
+        const roundScore = clamp(baseScore + recovery - penalty, 0, 10);
+        return roundScore;
+      }
+
+      // -------------------------
+      // Game state
+      // -------------------------
+      const TOTAL_ROUNDS = 5;
+      const difficulty = {
+        normal: { memoriseSec: 5, guessSec: 10, satMax: 40, briMin: 2, briMax: 22 },
+        hard: { memoriseSec: 3, guessSec: 10, satMax: 25, briMin: 2, briMax: 15 },
+      };
+
+      let rng = Math.random;
+      let mode = "normal";
+      const LEADERBOARD_URL = "https://mantledb.sh/v2/blacked-out/leaderboard/top5";
+
+      const state = {
+        roundIndex: 0,
+        phase: "start",
+        current: null, // { target, guess, deltaE, score }
+        rounds: [],
+        audio: null,
+        timer: null,
+        guessSubmitted: false,
+        sessionId: 0,
+        activeSessionId: 0,
+        leaderboard: [],
+      };
+
+      // -------------------------
+      // Audio (optional nicety)
+      // -------------------------
+      function createAudio() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        const ctx = new AudioCtx();
+        return ctx;
+      }
+
+      function ensureAudio() {
+        if (!state.audio) state.audio = createAudio();
+        return state.audio;
+      }
+
+      async function resumeAudioContext(ctx) {
+        if (!ctx) return false;
+        if (ctx.state !== "suspended") return true;
+        try {
+          await ctx.resume();
+          return ctx.state === "running";
+        } catch {
+          return false;
+        }
+      }
+
+      async function startHum() {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const ready = await resumeAudioContext(ctx);
+        if (!ready) return;
+
+        // Hum as a low sine + gentle noise-like wobble via a second oscillator.
+        const osc1 = ctx.createOscillator();
+        osc1.type = "sine";
+        osc1.frequency.value = 42;
+
+        const osc2 = ctx.createOscillator();
+        osc2.type = "sine";
+        osc2.frequency.value = 56;
+
+        const gain = ctx.createGain();
+        gain.gain.value = 0.0;
+
+        const lfo = ctx.createOscillator();
+        lfo.type = "sine";
+        lfo.frequency.value = 0.65;
+
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = 8; // modulate osc frequency slightly
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc2.frequency);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(0.0, now);
+        gain.gain.linearRampToValueAtTime(0.035, now + 0.25);
+        osc1.start(now);
+        osc2.start(now);
+        lfo.start(now);
+
+        state.audioHum = { ctx, osc1, osc2, lfo, gain };
+      }
+
+      function stopHum() {
+        const hum = state.audioHum;
+        if (!hum) return;
+        const ctx = hum.ctx;
+        const now = ctx.currentTime;
+        hum.gain.gain.cancelScheduledValues(now);
+        hum.gain.gain.setValueAtTime(hum.gain.gain.value, now);
+        hum.gain.gain.linearRampToValueAtTime(0.0, now + 0.15);
+        // Stop slightly later to avoid clicks.
+        setTimeout(() => {
+          try {
+            hum.osc1.stop();
+            hum.osc2.stop();
+            hum.lfo.stop();
+          } catch {}
+        }, 220);
+        state.audioHum = null;
+      }
+
+      async function clickSubmitSound() {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const ready = await resumeAudioContext(ctx);
+        if (!ready) return;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = 180;
+        gain.gain.value = 0.0;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(0.0, now);
+        gain.gain.linearRampToValueAtTime(0.06, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+
+      // -------------------------
+      // UI state transitions
+      // -------------------------
+      function showScreen(which) {
+        $("screenStart").classList.remove("active");
+        $("screenRound").classList.remove("active");
+        $("screenResult").classList.remove("active");
+        $("screenEnd").classList.remove("active");
+        which.classList.add("active");
+      }
+
+      function setBlackout(on) {
+        const el = $("blackout");
+        if (on) {
+          el.style.transition = "opacity 500ms ease";
+          el.classList.add("on");
+        } else {
+          // Remove instantly so the 500ms blackout moment feels intentional.
+          el.style.transition = "opacity 0ms linear";
+          el.classList.remove("on");
+          // Reset for future activations.
+          setTimeout(() => {
+            el.style.transition = "opacity 500ms ease";
+          }, 0);
+        }
+      }
+
+      function toast(msg) {
+        const t = $("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(() => t.classList.remove("show"), 1100);
+      }
+
+      // -------------------------
+      // Target generation
+      // -------------------------
+      function randRange(min, max) {
+        return min + (max - min) * rng();
+      }
+
+      function generateTarget() {
+        const cfg = difficulty[mode];
+        const h = randRange(0, 360);
+        const s = randRange(0, cfg.satMax);
+        const b = randRange(cfg.briMin, cfg.briMax);
+        return { h, s, b };
+      }
+
+      function randomGuessStart() {
+        // Spec: Sliders start at a random position each round (not at the target).
+        // We'll pick uniformly across the full slider ranges.
+        const h = randRange(0, 360);
+        const s = randRange(0, 100);
+        const b = randRange(0, 100);
+        return { h, s, b };
+      }
+
+      // -------------------------
+      // Slider UI + gradients
+      // -------------------------
+      const hRange = $("hRange");
+      const sRange = $("sRange");
+      const bRange = $("bRange");
+      const hVal = $("hVal");
+      const sVal = $("sVal");
+      const bVal = $("bVal");
+
+      function updateSliderLabelsAndPreview() {
+        const hsvGuess = {
+          h: Number(hRange.value),
+          s: Number(sRange.value),
+          b: Number(bRange.value),
+        };
+
+        hVal.textContent = format1(hsvGuess.h);
+        sVal.textContent = format1(hsvGuess.s);
+        bVal.textContent = format1(hsvGuess.b);
+
+        const rgb = hsvToRgb({ h: hsvGuess.h, s: hsvGuess.s, v: hsvGuess.b });
+        setSwatch($("previewSwatch"), rgb);
+
+        // Update slider gradients based on current "other" dimensions.
+        updateGradientsFromCurrentSliders();
+      }
+
+      function rgbToCss(rgb) {
+        return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+      }
+
+      function buildGradient(samples, getAt) {
+        // samples= array of scalar t values in [0..1]
+        const stops = samples.map((t, i) => {
+          const rgb = getAt(t);
+          const pct = Math.round((i / (samples.length - 1)) * 1000) / 10; // 0..100 with 0.1 precision
+          return `${rgbToCss(rgb)} ${pct}%`;
+        });
+        return `linear-gradient(90deg, ${stops.join(", ")})`;
+      }
+
+      function updateHueGradient() {
+        const baseS = Number(sRange.value);
+        const baseB = Number(bRange.value);
+        const samples = Array.from({ length: 13 }, (_, i) => i / 12);
+        const grad = buildGradient(samples, (t) => {
+          const h = t * 360;
+          return hsvToRgb({ h, s: baseS, v: baseB });
+        });
+        hRange.style.setProperty("--grad", grad);
+      }
+
+      function updateSatGradient() {
+        const baseH = Number(hRange.value);
+        const baseB = Number(bRange.value);
+        const samples = Array.from({ length: 13 }, (_, i) => i / 12);
+        const grad = buildGradient(samples, (t) => {
+          const s = t * 100;
+          return hsvToRgb({ h: baseH, s, v: baseB });
+        });
+        sRange.style.setProperty("--grad", grad);
+      }
+
+      function updateBriGradient() {
+        const baseH = Number(hRange.value);
+        const baseS = Number(sRange.value);
+        const samples = Array.from({ length: 13 }, (_, i) => i / 12);
+        const grad = buildGradient(samples, (t) => {
+          const v = t * 100;
+          return hsvToRgb({ h: baseH, s: baseS, v });
+        });
+        bRange.style.setProperty("--grad", grad);
+      }
+
+      function updateGradientsFromCurrentSliders() {
+        updateHueGradient();
+        updateSatGradient();
+        updateBriGradient();
+      }
+
+      // -------------------------
+      // Timer + guessing
+      // -------------------------
+      function setGuessPhaseUI() {
+        $("phaseMemorise").style.display = "none";
+        $("phaseGuess").style.display = "grid";
+        state.phase = "guess";
+      }
+
+      function setMemorisePhaseUI() {
+        $("phaseMemorise").style.display = "grid";
+        $("phaseGuess").style.display = "none";
+        state.phase = "memorise";
+      }
+
+      function setTimerUI(remainingSec, totalSec) {
+        const bar = $("timerBar");
+        const num = $("timerNum");
+        const hint = $("timerHint");
+
+        const clampedRemaining = clamp(remainingSec, 0, totalSec);
+        const pct = totalSec <= 0 ? 0 : clampedRemaining / totalSec;
+        bar.style.width = `${Math.round(pct * 10000) / 100}%`;
+
+        const remainingWhole = Math.ceil(remainingSec);
+        num.textContent = String(Math.max(0, remainingWhole));
+
+        const danger = remainingWhole <= 5;
+        if (danger) {
+          bar.style.background = "rgba(255, 59, 59, 0.98)";
+          hint.textContent = "The void is closing in.";
+          hint.classList.add("danger");
+        } else {
+          bar.style.background = "rgba(255, 255, 255, 0.86)";
+          hint.textContent = " ";
+          hint.classList.remove("danger");
+        }
+      }
+
+      function startGuessTimer(guessSec, sessionId) {
+        state.guessSubmitted = false;
+        const totalMs = guessSec * 1000;
+        const startMs = performance.now();
+
+        function tick() {
+          if (state.sessionId !== sessionId) return; // stale timer from a previous game
+          const elapsed = performance.now() - startMs;
+          const remainingMs = totalMs - elapsed;
+          const remainingSec = remainingMs / 1000;
+          setTimerUI(remainingSec, guessSec);
+
+          if (remainingMs <= 0 && !state.guessSubmitted) {
+            // Timer ran out: submit current slider values.
+            submitGuess({ reason: "timeout" });
+            return;
+          }
+          if (!state.guessSubmitted) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      function getCurrentGuessHsv() {
+        return {
+          h: Number(hRange.value),
+          s: Number(sRange.value),
+          b: Number(bRange.value),
+        };
+      }
+
+      function setGuessSlidersTo(hsv) {
+        hRange.value = String(hsv.h);
+        sRange.value = String(hsv.s);
+        bRange.value = String(hsv.b);
+        updateSliderLabelsAndPreview();
+      }
+
+      function disableSlidersAndSubmit(disabled) {
+        hRange.disabled = disabled;
+        sRange.disabled = disabled;
+        bRange.disabled = disabled;
+        $("submitBtn").disabled = disabled;
+        $("submitBtn").style.opacity = disabled ? 0.55 : 1;
+      }
+
+      // -------------------------
+      // Round execution
+      // -------------------------
+      function computeRoundResult(target, guess) {
+        const deltaE = deltaE76(target, guess);
+        const score = roundScoreFrom(target, guess, deltaE);
+        return { deltaE, score };
+      }
+
+      function onNextFromResult() {
+        if (state.roundIndex >= TOTAL_ROUNDS - 1) {
+          showEndScreen();
+        } else {
+          beginRound(state.roundIndex + 1);
+        }
+      }
+
+      function showResultScreen(roundResult) {
+        const target = roundResult.target;
+        const guess = roundResult.guess;
+        const { deltaE, score } = roundResult;
+
+        setSwatch($("targetSwatchRes"), hsvToRgb({ h: target.h, s: target.s, v: target.b }));
+        setSwatch($("guessSwatchRes"), hsvToRgb({ h: guess.h, s: guess.s, v: guess.b }));
+
+        $("tH").textContent = format1(target.h);
+        $("tS").textContent = format1(target.s);
+        $("tB").textContent = format1(target.b);
+
+        $("gH").textContent = format1(guess.h);
+        $("gS").textContent = format1(guess.s);
+        $("gB").textContent = format1(guess.b);
+
+        $("roundScore").textContent = format2(score);
+        $("deltaEVal").textContent = format2(deltaE);
+        $("phaseLabel").textContent = `${mode === "hard" ? "Hard" : "Normal"}`;
+
+        if (score >= 9.995) toast("You see what others can't.");
+
+        $("nextBtn").textContent = state.roundIndex >= TOTAL_ROUNDS - 1 ? "Finish" : "Continue";
+
+        showScreen($("screenResult"));
+      }
+
+      function submitGuess({ reason }) {
+        if (state.guessSubmitted) return;
+        state.guessSubmitted = true;
+
+        disableSlidersAndSubmit(true);
+
+        void clickSubmitSound();
+
+        const guess = getCurrentGuessHsv();
+        const target = state.current.target;
+
+        const res = computeRoundResult(target, guess);
+        const roundScore = res.score;
+
+        state.current.guess = guess;
+        state.current.deltaE = res.deltaE;
+        state.current.score = roundScore;
+
+        // Store comparison.
+        state.rounds.push({
+          round: state.roundIndex + 1,
+          target,
+          guess,
+          deltaE: res.deltaE,
+          score: roundScore,
+        });
+
+        showResultScreen(state.current);
+      }
+
+      function setRandomGuessNotTarget(target) {
+        // Keep generating until it's not identical (float equality is unlikely, but keep intent).
+        let guess = randomGuessStart();
+        // If by chance it's identical, nudge.
+        if (Math.abs(guess.h - target.h) < 1e-9 && Math.abs(guess.s - target.s) < 1e-9 && Math.abs(guess.b - target.b) < 1e-9) {
+          guess = { ...guess, h: (guess.h + 37) % 360 };
+        }
+        setGuessSlidersTo(guess);
+      }
+
+      function beginRound(i) {
+        state.roundIndex = i;
+        const sessionId = state.sessionId;
+        state.activeSessionId = sessionId;
+        state.current = { target: generateTarget(), guess: null, score: 0, deltaE: 0 };
+        state.guessSubmitted = false;
+        // Keep sliders disabled until we enter the guess phase.
+        disableSlidersAndSubmit(true);
+
+        // Phase UI
+        setMemorisePhaseUI();
+        showScreen($("screenRound"));
+        $("roundNum").textContent = String(i + 1);
+
+        // Update target swatch
+        const target = state.current.target;
+        setSwatch($("targetSwatchMem"), hsvToRgb({ h: target.h, s: target.s, v: target.b }));
+
+        stopHum(); // ensure clean start
+
+        // Begin memorisation.
+        if (state.audio) void startHum();
+        const memoriseSec = difficulty[mode].memoriseSec;
+        setTimerUI(memoriseSec, memoriseSec); // reuse UI for a subtle bar fill in memorise
+
+        const startMs = performance.now();
+        function memoriseTick() {
+          if (state.sessionId !== sessionId) return; // stale tick from a previous game
+          const elapsed = performance.now() - startMs;
+          const remaining = memoriseSec - elapsed / 1000;
+          setTimerUI(remaining, memoriseSec);
+          if (remaining <= 0) {
+            // blackout transition
+            stopHum();
+            doBlackoutThenGuess();
+            return;
+          }
+          if (!state.guessSubmitted) requestAnimationFrame(memoriseTick);
+        }
+        requestAnimationFrame(memoriseTick);
+
+        function doBlackoutThenGuess() {
+          setBlackout(true);
+          // After 500ms: switch to guess screen and turn off blackout.
+          setTimeout(() => {
+            if (state.sessionId !== sessionId) return; // stale blackout callback
+            setBlackout(false);
+            // Guess phase
+            setGuessPhaseUI();
+            const guessSec = difficulty[mode].guessSec;
+
+            // Start sliders random.
+            setRandomGuessNotTarget(target);
+
+            // Enable gradients already done by slider update.
+            disableSlidersAndSubmit(false);
+
+            // Reset timer UI to full, then start countdown.
+            setTimerUI(guessSec, guessSec);
+            startGuessTimer(guessSec, sessionId);
+          }, 500);
+        }
+      }
+
+      // -------------------------
+      // End screen + grade
+      // -------------------------
+      function totalScore() {
+        return state.rounds.reduce((acc, r) => acc + r.score, 0);
+      }
+
+      function gradeFor(total) {
+        if (total <= 10) return "Still in the dark";
+        if (total <= 20) return "Shades of mediocre";
+        if (total <= 30) return "Getting warmer... or colder?";
+        if (total <= 40) return "Into the void";
+        if (total <= 47) return "You see in the dark";
+        return "Black Belt";
+      }
+
+      function showEndScreen() {
+        // Stop any hum.
+        stopHum();
+
+        const total = totalScore();
+        const totalEl = $("totalScore");
+        totalEl.textContent = `${format2(total)}/50`;
+        $("gradeLabel").textContent = gradeFor(total);
+
+        const list = $("compareList");
+        list.innerHTML = "";
+
+        for (const r of state.rounds) {
+          const item = document.createElement("div");
+          item.className = "compareItem";
+
+          const swatchPair = document.createElement("div");
+          swatchPair.className = "miniSwatchPair";
+
+          const miniTarget = document.createElement("div");
+          miniTarget.className = "miniSwatch";
+          const tRgb = hsvToRgb({ h: r.target.h, s: r.target.s, v: r.target.b });
+          miniTarget.style.background = `rgb(${tRgb.r}, ${tRgb.g}, ${tRgb.b})`;
+          miniTarget.title = `Target (H ${format1(r.target.h)}, S ${format1(r.target.s)}, B ${format1(r.target.b)})`;
+
+          const miniGuess = document.createElement("div");
+          miniGuess.className = "miniSwatch";
+          const gRgb = hsvToRgb({ h: r.guess.h, s: r.guess.s, v: r.guess.b });
+          miniGuess.style.background = `rgb(${gRgb.r}, ${gRgb.g}, ${gRgb.b})`;
+          miniGuess.title = `Guess (H ${format1(r.guess.h)}, S ${format1(r.guess.s)}, B ${format1(r.guess.b)})`;
+
+          swatchPair.appendChild(miniTarget);
+          swatchPair.appendChild(miniGuess);
+
+          const text = document.createElement("div");
+          text.className = "compareText";
+
+          const top = document.createElement("div");
+          top.className = "compareTop";
+          const title = document.createElement("div");
+          title.className = "compareTitle";
+          title.textContent = `Round ${r.round}`;
+
+          const subScore = document.createElement("div");
+          subScore.className = "compareSub";
+          subScore.textContent = `${format2(r.score)} · dE ${format2(r.deltaE)}`;
+
+          top.appendChild(title);
+          top.appendChild(subScore);
+
+          const sub = document.createElement("div");
+          sub.className = "compareSub";
+          sub.textContent = `Target vs guess (perceptual drift)`;
+
+          text.appendChild(top);
+          text.appendChild(sub);
+
+          item.appendChild(swatchPair);
+          item.appendChild(text);
+          list.appendChild(item);
+        }
+
+        showScreen($("screenEnd"));
+        loadLeaderboard();
+      }
+
+      function resetState() {
+        state.sessionId += 1;
+        state.roundIndex = 0;
+        state.phase = "start";
+        state.current = null;
+        state.rounds = [];
+        state.guessSubmitted = false;
+      }
+
+      function computeShareText() {
+        const total = totalScore();
+        const v = `${format1(total)}/50`;
+        return `Blacked Out (${mode}) — ${v}`;
+      }
+
+      async function shareGame() {
+        const text = computeShareText();
+        const shareData = { title: "Blacked Out", text };
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+            return;
+          }
+        } catch {}
+
+        // Fallback: copy to clipboard.
+        try {
+          await navigator.clipboard.writeText(text);
+          toast("Score copied.");
+        } catch {
+          toast(text);
+        }
+      }
+
+      // -------------------------
+      // Start/exit and controls
+      // -------------------------
+      function setMode(newMode) {
+        mode = newMode;
+        const btnNormal = $("btnNormal");
+        const btnHard = $("btnHard");
+        if (mode === "normal") {
+          btnNormal.classList.add("active");
+          btnHard.classList.remove("active");
+          btnNormal.setAttribute("aria-selected", "true");
+          btnHard.setAttribute("aria-selected", "false");
+        } else {
+          btnHard.classList.add("active");
+          btnNormal.classList.remove("active");
+          btnHard.setAttribute("aria-selected", "true");
+          btnNormal.setAttribute("aria-selected", "false");
+        }
+      }
+
+      async function startGame() {
+        resetState();
+        setMode(mode);
+
+        // Randomized run.
+        rng = Math.random;
+
+        disableSlidersAndSubmit(true);
+        state.phase = "memorise";
+        state.current = null;
+
+        // Resume audio context if one has been initialized by user gesture.
+        if (state.audio) {
+          await resumeAudioContext(state.audio);
+        }
+
+        // Begin first round.
+        beginRound(0);
+      }
+
+      function exitToStart() {
+        stopHum();
+        state.guessSubmitted = false;
+        setBlackout(false);
+        resetState();
+        showScreen($("screenStart"));
+      }
+
+      // -------------------------
+      // Wire up events
+      // -------------------------
+      $("btnNormal").addEventListener("click", () => setMode("normal"));
+      $("btnHard").addEventListener("click", () => setMode("hard"));
+
+      $("startBtn").addEventListener("click", async () => {
+        // Audio init on first user action.
+        if (window.AudioContext || window.webkitAudioContext) {
+          state.audio = ensureAudio();
+        }
+        await startGame();
+      });
+
+      $("howBtn").addEventListener("click", () => $("howOverlay").classList.add("active"));
+      $("howCloseBtn").addEventListener("click", () => $("howOverlay").classList.remove("active"));
+      $("howOverlay").addEventListener("click", (e) => {
+        if (e.target === $("howOverlay")) $("howOverlay").classList.remove("active");
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!$("howOverlay").classList.contains("active")) return;
+        $("howOverlay").classList.remove("active");
+      });
+
+      $("submitBtn").addEventListener("click", () => submitGuess({ reason: "submit" }));
+
+      $("nextBtn").addEventListener("click", onNextFromResult);
+
+      $("exitBtn").addEventListener("click", exitToStart);
+      $("resultExitBtn").addEventListener("click", exitToStart);
+      $("endExitBtn").addEventListener("click", exitToStart);
+
+      $("againBtn").addEventListener("click", async () => {
+        // Keep current difficulty selection.
+        if (window.AudioContext || window.webkitAudioContext) {
+          state.audio = ensureAudio();
+        }
+        await startGame();
+      });
+
+      $("shareBtn").addEventListener("click", () => shareGame());
+      $("lbSubmitBtn").addEventListener("click", () => submitLeaderboardScore());
+      $("lbRefreshBtn").addEventListener("click", () => loadLeaderboard());
+
+      // Slider input handlers
+      hRange.addEventListener("input", updateSliderLabelsAndPreview);
+      sRange.addEventListener("input", updateSliderLabelsAndPreview);
+      bRange.addEventListener("input", updateSliderLabelsAndPreview);
+
+      // Keyboard submit during guess
+      window.addEventListener("keydown", (e) => {
+        if (state.phase !== "guess") return;
+        if (e.key === "Enter") {
+          e.preventDefault();
+          submitGuess({ reason: "enter" });
+        }
+      });
+
+      // -------------------------
+      // Default slider gradients
+      // -------------------------
+      function initSliders() {
+        setGuessSlidersTo({ h: 0, s: 0, b: 0 });
+        // set gradients once
+        updateGradientsFromCurrentSliders();
+      }
+
+      initSliders();
+      setBlackout(false);
+      disableSlidersAndSubmit(true);
+      updateGradientsFromCurrentSliders();
+
+      // -------------------------
+      // Global leaderboard (Top 5)
+      // -------------------------
+      function sanitizeName(input) {
+        const clean = (input || "").replace(/\s+/g, " ").trim();
+        return clean.slice(0, 10);
+      }
+
+      function safeScore(val) {
+        if (!Number.isFinite(val)) return 0;
+        return Math.round(val * 100) / 100;
+      }
+
+      function sortAndLimit(entries) {
+        return entries
+          .filter((e) => e && typeof e.name === "string" && Number.isFinite(e.score))
+          .map((e) => ({
+            name: sanitizeName(e.name),
+            score: safeScore(Number(e.score)),
+            createdAt: Number(e.createdAt) || Date.now(),
+          }))
+          .filter((e) => e.name.length > 0)
+          .sort((a, b) => b.score - a.score || a.createdAt - b.createdAt)
+          .slice(0, 5);
+      }
+
+      function renderLeaderboard(entries) {
+        const list = $("lbList");
+        list.innerHTML = "";
+        if (!entries.length) {
+          const empty = document.createElement("div");
+          empty.className = "smallPrint";
+          empty.textContent = "No entries yet. Be the first in the dark.";
+          list.appendChild(empty);
+          return;
+        }
+
+        entries.forEach((entry, idx) => {
+          const item = document.createElement("div");
+          item.className = "compareItem";
+
+          const left = document.createElement("div");
+          left.className = "compareTitle";
+          left.textContent = `#${idx + 1}`;
+
+          const text = document.createElement("div");
+          text.className = "compareText";
+
+          const top = document.createElement("div");
+          top.className = "compareTop";
+          const n = document.createElement("div");
+          n.className = "compareTitle";
+          n.textContent = entry.name;
+          const s = document.createElement("div");
+          s.className = "compareSub";
+          s.textContent = `${format2(entry.score)}/50`;
+          top.appendChild(n);
+          top.appendChild(s);
+
+          text.appendChild(top);
+          item.appendChild(left);
+          item.appendChild(text);
+          list.appendChild(item);
+        });
+      }
+
+      async function fetchLeaderboardData() {
+        const res = await fetch(LEADERBOARD_URL, { method: "GET" });
+        if (!res.ok) {
+          if (res.status === 404) return { entries: [] };
+          throw new Error(`Leaderboard read failed (${res.status})`);
+        }
+        const data = await res.json();
+        if (!data || !Array.isArray(data.entries)) return { entries: [] };
+        return data;
+      }
+
+      async function writeLeaderboardData(entries) {
+        const payload = { entries: sortAndLimit(entries), updatedAt: Date.now() };
+        const res = await fetch(LEADERBOARD_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`Leaderboard write failed (${res.status})`);
+        return payload;
+      }
+
+      async function loadLeaderboard() {
+        const hint = $("lbHint");
+        hint.textContent = "Loading global top 5...";
+        try {
+          const data = await fetchLeaderboardData();
+          state.leaderboard = sortAndLimit(data.entries || []);
+          renderLeaderboard(state.leaderboard);
+          hint.textContent = " ";
+        } catch (err) {
+          hint.textContent = "Could not load leaderboard right now.";
+          renderLeaderboard([]);
+        }
+      }
+
+      async function submitLeaderboardScore() {
+        const hint = $("lbHint");
+        const input = $("lbName");
+        const name = sanitizeName(input.value);
+        if (!name) {
+          hint.textContent = "Enter a name (1-10 chars).";
+          return;
+        }
+
+        const score = safeScore(totalScore());
+        const entry = { name, score, createdAt: Date.now() };
+        hint.textContent = "Submitting score...";
+        $("lbSubmitBtn").disabled = true;
+
+        try {
+          const current = await fetchLeaderboardData();
+          const merged = sortAndLimit([...(current.entries || []), entry]);
+          await writeLeaderboardData(merged);
+          state.leaderboard = merged;
+          renderLeaderboard(merged);
+          hint.textContent = "Score submitted.";
+          input.value = "";
+        } catch (err) {
+          hint.textContent = "Submit failed. Try again.";
+        } finally {
+          $("lbSubmitBtn").disabled = false;
+        }
+      }
+    </script>
+  </body>
+</html>
+
