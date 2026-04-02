@@ -32,6 +32,8 @@
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
           "Segoe UI Emoji";
         overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
       }
 
       .app {
@@ -42,8 +44,8 @@
 
       .screen {
         display: none;
-        padding: 22px 16px;
-        min-height: 100vh;
+        padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(14px + env(safe-area-inset-bottom, 0px));
+        min-height: 100dvh;
         place-items: center;
       }
 
@@ -55,6 +57,7 @@
         width: min(980px, 100%);
         display: grid;
         gap: 18px;
+        contain: layout style;
       }
 
       .topbar {
@@ -99,6 +102,7 @@
         user-select: none;
         transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
 
       .btn:hover {
@@ -109,6 +113,13 @@
 
       .btn:active {
         transform: translateY(0px);
+      }
+
+      .btn:focus-visible,
+      .seg button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.7);
+        outline-offset: 2px;
       }
 
       .btn.primary {
@@ -253,6 +264,8 @@
         background: #000;
         position: relative;
         overflow: hidden;
+        contain: paint;
+        will-change: background;
       }
 
       .swatch::after {
@@ -299,6 +312,7 @@
       .timerNum {
         font-weight: 900;
         font-size: 22px;
+        font-variant-numeric: tabular-nums;
       }
 
       .bar {
@@ -363,7 +377,7 @@
         background: transparent;
         margin: 0;
         cursor: pointer;
-        touch-action: none;
+        touch-action: pan-y;
       }
 
       input[type="range"]::-webkit-slider-runnable-track {
@@ -633,6 +647,51 @@
         padding: 3px 8px;
         display: inline-block;
         margin-left: 6px;
+      }
+
+      @media (max-width: 640px) {
+        .screen {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .topbar {
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .title {
+          font-size: clamp(22px, 7vw, 34px);
+        }
+
+        .card {
+          border-radius: 14px;
+          padding: 12px;
+        }
+
+        .swatch {
+          width: min(96vw, 430px);
+          height: min(96vw, 430px);
+          border-radius: 16px;
+        }
+
+        .timerNum {
+          font-size: 20px;
+        }
+
+        .main-actions .btn,
+        .footerRow .btn {
+          min-height: 42px;
+          padding: 10px 14px;
+        }
+      }
+
+      @media (hover: none) {
+        .btn:hover {
+          transform: none;
+          background: rgba(255, 255, 255, 0.06);
+          border-color: rgba(255, 255, 255, 0.16);
+        }
       }
     </style>
   </head>
@@ -1286,6 +1345,7 @@
       const hVal = $("hVal");
       const sVal = $("sVal");
       const bVal = $("bVal");
+      let gradientRaf = 0;
 
       function updateSliderLabelsAndPreview() {
         const hsvGuess = {
@@ -1301,8 +1361,8 @@
         const rgb = hsvToRgb({ h: hsvGuess.h, s: hsvGuess.s, v: hsvGuess.b });
         setSwatch($("previewSwatch"), rgb);
 
-        // Update slider gradients based on current "other" dimensions.
-        updateGradientsFromCurrentSliders();
+        // Batch expensive gradient painting to one frame during drags.
+        scheduleGradientUpdate();
       }
 
       function rgbToCss(rgb) {
@@ -1356,6 +1416,14 @@
         updateHueGradient();
         updateSatGradient();
         updateBriGradient();
+      }
+
+      function scheduleGradientUpdate() {
+        if (gradientRaf) return;
+        gradientRaf = requestAnimationFrame(() => {
+          gradientRaf = 0;
+          updateGradientsFromCurrentSliders();
+        });
       }
 
       // -------------------------
