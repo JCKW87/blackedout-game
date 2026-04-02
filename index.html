@@ -683,6 +683,31 @@
           border-radius: 16px;
         }
 
+        #phaseGuess {
+          grid-template-columns: 1fr;
+          gap: 10px;
+          justify-items: center;
+        }
+
+        #phaseGuess .swatchWrap > .card {
+          display: none;
+        }
+
+        #previewSwatch {
+          width: min(94vw, 420px) !important;
+          height: min(94vw, 420px) !important;
+          margin-top: 0 !important;
+        }
+
+        #guessControlsCard {
+          width: min(94vw, 420px);
+          margin-top: calc(-1 * min(38vw, 168px));
+          z-index: 4;
+          background: rgba(10, 10, 10, 0.62);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+        }
+
         .timerNum {
           font-size: 20px;
         }
@@ -773,7 +798,7 @@
               <div id="previewSwatch" class="swatch" style="margin-top: 14px; width: min(470px, 88vw); height: min(470px, 88vw)"></div>
             </div>
 
-            <div class="card">
+            <div id="guessControlsCard" class="card">
               <div class="timerBlock">
                 <div class="timerRow">
                   <div class="timerLabel">Time left</div>
@@ -814,6 +839,16 @@
                   <div class="smallPrint">Press <span class="kbd">Enter</span> or tap <b>Submit</b>.</div>
                   <button id="submitBtn" class="btn primary" type="button">Submit</button>
                 </div>
+
+                <div id="mobileRoundResult" style="display: none; margin-top: 10px">
+                  <div class="metricRow">
+                    <div class="metricLabel">Round score</div>
+                    <div id="mobileRoundScore" class="metricVal">0.00</div>
+                  </div>
+                  <button id="mobileContinueBtn" class="btn primary" type="button" style="width: 100%; margin-top: 10px">
+                    Continue
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -852,14 +887,6 @@
               <div class="metricRow">
                 <div class="metricLabel">Round score</div>
                 <div id="roundScore" class="metricVal">0.00</div>
-              </div>
-              <div class="metricRow">
-                <div class="metricLabel">Delta E (CIE76)</div>
-                <div id="deltaEVal" class="metricVal">0.00</div>
-              </div>
-              <div class="metricRow">
-                <div class="metricLabel">Phase</div>
-                <div id="phaseLabel" class="metricVal">Memorise</div>
               </div>
             </div>
 
@@ -1538,7 +1565,7 @@
       function showResultScreen(roundResult) {
         const target = roundResult.target;
         const guess = roundResult.guess;
-        const { deltaE, score } = roundResult;
+        const { score } = roundResult;
 
         setSwatch($("targetSwatchRes"), hsvToRgb({ h: target.h, s: target.s, v: target.b }));
         setSwatch($("guessSwatchRes"), hsvToRgb({ h: guess.h, s: guess.s, v: guess.b }));
@@ -1552,12 +1579,16 @@
         $("gB").textContent = format1(guess.b);
 
         $("roundScore").textContent = format2(score);
-        $("deltaEVal").textContent = format2(deltaE);
-        $("phaseLabel").textContent = `${mode === "hard" ? "Hard" : "Normal"}`;
 
         if (score >= 9.995) toast("You see what others can't.");
 
         $("nextBtn").textContent = state.roundIndex >= TOTAL_ROUNDS - 1 ? "Finish" : "Continue";
+        if (window.matchMedia("(max-width: 640px)").matches) {
+          $("mobileRoundScore").textContent = format2(score);
+          $("mobileContinueBtn").textContent = state.roundIndex >= TOTAL_ROUNDS - 1 ? "Finish" : "Continue";
+          $("mobileRoundResult").style.display = "block";
+          return;
+        }
 
         showScreen($("screenResult"));
       }
@@ -1608,6 +1639,7 @@
         state.activeSessionId = sessionId;
         state.current = { target: generateTarget(), guess: null, score: 0, deltaE: 0 };
         state.guessSubmitted = false;
+        $("mobileRoundResult").style.display = "none";
         // Keep sliders disabled until we enter the guess phase.
         disableSlidersAndSubmit(true);
 
@@ -1727,7 +1759,7 @@
 
           const subScore = document.createElement("div");
           subScore.className = "compareSub";
-          subScore.textContent = `${format2(r.score)} · dE ${format2(r.deltaE)}`;
+          subScore.textContent = `${format2(r.score)}`;
 
           top.appendChild(title);
           top.appendChild(subScore);
@@ -1857,6 +1889,7 @@
       });
 
       $("submitBtn").addEventListener("click", () => submitGuess({ reason: "submit" }));
+      $("mobileContinueBtn").addEventListener("click", onNextFromResult);
 
       $("nextBtn").addEventListener("click", onNextFromResult);
 
