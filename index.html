@@ -669,9 +669,17 @@
           padding: 12px;
         }
 
+        .frame {
+          gap: 12px;
+        }
+
+        .swatchWrap {
+          gap: 10px;
+        }
+
         .swatch {
-          width: min(96vw, 430px);
-          height: min(96vw, 430px);
+          width: min(62vw, 300px);
+          height: min(62vw, 300px);
           border-radius: 16px;
         }
 
@@ -769,7 +777,7 @@
               <div class="timerBlock">
                 <div class="timerRow">
                   <div class="timerLabel">Time left</div>
-                  <div id="timerNum" class="timerNum">10</div>
+                  <div id="timerNum" class="timerNum">30</div>
                 </div>
                 <div class="bar" aria-hidden="true"><div id="timerBar" style="width: 100%"></div></div>
                 <div id="timerHint" class="timerHint"> </div>
@@ -1147,8 +1155,8 @@
       // -------------------------
       const TOTAL_ROUNDS = 5;
       const difficulty = {
-        normal: { memoriseSec: 5, guessSec: 10, satMax: 40, briMin: 2, briMax: 22 },
-        hard: { memoriseSec: 3, guessSec: 10, satMax: 25, briMin: 2, briMax: 15 },
+        normal: { memoriseSec: 5, guessSec: 30, satMax: 40, briMin: 2, briMax: 22 },
+        hard: { memoriseSec: 3, guessSec: 30, satMax: 25, briMin: 2, briMax: 15 },
       };
 
       let rng = Math.random;
